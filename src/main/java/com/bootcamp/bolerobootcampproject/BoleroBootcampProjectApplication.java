@@ -9,5 +9,4 @@ public class BoleroBootcampProjectApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(BoleroBootcampProjectApplication.class, args);
 	}
-
 }
