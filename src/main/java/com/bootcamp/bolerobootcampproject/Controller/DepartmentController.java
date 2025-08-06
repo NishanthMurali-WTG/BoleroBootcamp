@@ -2,7 +2,6 @@ package com.bootcamp.bolerobootcampproject.Controller;
 
 import com.bootcamp.bolerobootcampproject.Entity.Department;
 import com.bootcamp.bolerobootcampproject.Service.DepartmentService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,9 +9,13 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/departments")
-@RequiredArgsConstructor
 public class DepartmentController {
+
     private final DepartmentService departmentService;
+
+    public DepartmentController(DepartmentService departmentService) {
+        this.departmentService = departmentService;
+    }
 
     @GetMapping
     public List<Department> findAll() {

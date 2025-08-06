@@ -30,5 +30,6 @@ public class Employee {
             joinColumns = @JoinColumn(name = "ID_EMPLOYEE"),
             inverseJoinColumns = @JoinColumn(name = "ID_DEPARTMENT")
     )
+    //@JsonBackReference("department-employee")
     private Set<Department> departments = new HashSet<>();
 }
