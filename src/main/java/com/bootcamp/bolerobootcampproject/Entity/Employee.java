@@ -18,10 +18,10 @@ public class Employee {
     @SequenceGenerator(name = "seq_employee", sequenceName = "SEQ_EMPLOYEE", allocationSize = 1)
     private Integer id;
 
-    @Column(name = "NAMEFIRST")
+    @Column(name = "NAMEFIRST", nullable = false)
     private String nameFirst;
 
-    @Column(name = "NAMELAST")
+    @Column(name = "NAMELAST", nullable = false)
     private String nameLast;
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -30,6 +30,5 @@ public class Employee {
             joinColumns = @JoinColumn(name = "ID_EMPLOYEE"),
             inverseJoinColumns = @JoinColumn(name = "ID_DEPARTMENT")
     )
-    //@JsonBackReference("department-employee")
     private Set<Department> departments = new HashSet<>();
 }

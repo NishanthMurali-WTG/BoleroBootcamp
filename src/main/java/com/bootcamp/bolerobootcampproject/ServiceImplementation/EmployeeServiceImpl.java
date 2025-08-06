@@ -9,7 +9,9 @@ import com.bootcamp.bolerobootcampproject.Service.EmployeeService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class EmployeeServiceImpl implements EmployeeService {
@@ -37,6 +39,8 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Transactional
     public Employee saveEmployee(Employee employee) {
+        Set<Department> requestedDepartments = fetchDepartmentsFromIds(employee.getDepartments());
+        employee.setDepartments(requestedDepartments);
         ensureMandatoryDepartment(employee);
         return employeeRepository.save(employee);
     }
@@ -45,9 +49,10 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Employee updateEmployee(Integer id, Employee employee) {
         Employee existingEmployee = getEmployeeById(id);
 
+        Set<Department> requestedDepartments = fetchDepartmentsFromIds(employee.getDepartments());
         existingEmployee.setNameFirst(employee.getNameFirst());
         existingEmployee.setNameLast(employee.getNameLast());
-        existingEmployee.setDepartments(employee.getDepartments());
+        existingEmployee.setDepartments(requestedDepartments);
         ensureMandatoryDepartment(employee);
         return employeeRepository.save(existingEmployee);
     }
@@ -69,5 +74,15 @@ public class EmployeeServiceImpl implements EmployeeService {
                 employee.getDepartments().add(department);
             }
         }
+    }
+
+    private Set<Department> fetchDepartmentsFromIds(Set<Department> departments) {
+        if(departments == null || departments.isEmpty()) {
+            return new HashSet<>();
+        }
+        List<Integer> deptIds = departments.stream()
+                .map(Department::getId)
+                .toList();
+        return new HashSet<>(departmentRepository.findAllById(deptIds));
     }
 }

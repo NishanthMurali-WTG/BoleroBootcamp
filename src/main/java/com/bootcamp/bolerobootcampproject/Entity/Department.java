@@ -23,8 +23,4 @@ public class Department {
 
     @Column(name = "MANDATORY")
     private boolean mandatory;
-
-//    @ManyToMany(mappedBy = "departments",  fetch = FetchType.EAGER)
-//    @JsonManagedReference("department-employee")
-//    private Set<Employee> employees = new HashSet<>();
 }

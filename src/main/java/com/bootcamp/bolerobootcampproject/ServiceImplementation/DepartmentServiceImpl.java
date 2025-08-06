@@ -1,20 +1,26 @@
 package com.bootcamp.bolerobootcampproject.ServiceImplementation;
 
 import com.bootcamp.bolerobootcampproject.Entity.Department;
+import com.bootcamp.bolerobootcampproject.Entity.Employee;
 import com.bootcamp.bolerobootcampproject.Exceptions.BusinessLogicException;
 import com.bootcamp.bolerobootcampproject.Exceptions.ResourceNotFoundException;
 import com.bootcamp.bolerobootcampproject.Repository.DepartmentRepository;
+import com.bootcamp.bolerobootcampproject.Repository.EmployeeRepository;
 import com.bootcamp.bolerobootcampproject.Service.DepartmentService;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 
 @Service
 public class DepartmentServiceImpl implements DepartmentService {
 
     private final DepartmentRepository departmentRepository;
+    private final EmployeeRepository employeeRepository;
 
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository, EmployeeRepository employeeRepository) {
         this.departmentRepository = departmentRepository;
+        this.employeeRepository = employeeRepository;
     }
 
     public List<Department> getAllDepartments() {
@@ -33,6 +39,7 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentRepository.save(department);
     }
 
+    @Transactional
     public Department updateDepartment(Integer id, Department department) {
         Department existingDepartment = getDepartmentById(id);
 
@@ -40,18 +47,35 @@ public class DepartmentServiceImpl implements DepartmentService {
             throw new BusinessLogicException("Cannot update readonly department");
         }
 
+        boolean isMandatoryChanging = existingDepartment.isMandatory() && (!department.isMandatory());
+
         existingDepartment.setName(department.getName());
         existingDepartment.setReadonly(department.isReadonly());
         existingDepartment.setMandatory(department.isMandatory());
 
-        return departmentRepository.save(existingDepartment);
+        Department updatedDepartment = departmentRepository.save(existingDepartment);
+
+        if(isMandatoryChanging){
+            removeDepartment(updatedDepartment);
+        }
+
+        return updatedDepartment;
     }
 
     public void deleteDepartment(Integer id) {
         Department department = getDepartmentById(id);
-        if(department.isReadonly() || department.isMandatory()) {
+        if(department.isReadonly()) {
             throw new BusinessLogicException("Cannot delete readonly department");
         }
         departmentRepository.delete(department);
+    }
+
+    private void removeDepartment(Department department) {
+        List<Employee> employeeInDepartment = employeeRepository.findByDepartments(department);
+
+        for (Employee employee : employeeInDepartment) {
+            employee.getDepartments().removeIf(d -> d.getId().equals(department.getId()));
+            employeeRepository.save(employee);
+        }
     }
 }
