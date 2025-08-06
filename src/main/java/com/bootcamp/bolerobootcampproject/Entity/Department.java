@@ -1,6 +1,5 @@
 package com.bootcamp.bolerobootcampproject.Entity;
 
-
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

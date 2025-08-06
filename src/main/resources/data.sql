@@ -1,1 +1,0 @@
-INSERT INTO DEPARTMENT (NAME, READONLY, MANDATORY) VALUES ('Organisation', true, true);

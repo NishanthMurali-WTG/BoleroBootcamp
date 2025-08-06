@@ -1,7 +1,5 @@
 package com.bootcamp.bolerobootcampproject.Entity;
 
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +16,7 @@ public class Employee {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq_employee")
     @SequenceGenerator(name = "seq_employee", sequenceName = "SEQ_EMPLOYEE", allocationSize = 1)
-    private Long id;
+    private Integer id;
 
     @Column(name = "NAMEFIRST")
     private String nameFirst;
@@ -32,6 +30,5 @@ public class Employee {
             joinColumns = @JoinColumn(name = "ID_EMPLOYEE"),
             inverseJoinColumns = @JoinColumn(name = "ID_DEPARTMENT")
     )
-    @JsonIgnoreProperties("employees")
     private Set<Department> departments = new HashSet<>();
 }

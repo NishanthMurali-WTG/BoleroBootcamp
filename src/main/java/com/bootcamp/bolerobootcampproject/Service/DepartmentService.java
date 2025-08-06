@@ -23,6 +23,9 @@ public class DepartmentService {
     }
 
     public Department saveDepartment(Department department) {
+        if (departmentRepository.existsByName(department.getName())) {
+            throw new BusinessLogicException("A department with the name '" + department.getName() + "' already exists.");
+        }
         return departmentRepository.save(department);
     }
 
