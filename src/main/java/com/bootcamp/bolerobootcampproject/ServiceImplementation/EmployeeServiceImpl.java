@@ -25,11 +25,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     public List<Employee> getAllEmployees() {
-        List<Employee> employeeList = employeeRepository.findAll();
-        for (Employee employee : employeeList) {
-            ensureMandatoryDepartment(employee);
-        }
-        return employeeList;
+        return employeeRepository.findAll();
     }
 
     public Employee getEmployeeById(Integer id) {
@@ -53,7 +49,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         existingEmployee.setNameFirst(employee.getNameFirst());
         existingEmployee.setNameLast(employee.getNameLast());
         existingEmployee.setDepartments(requestedDepartments);
-        ensureMandatoryDepartment(employee);
+        ensureMandatoryDepartment(existingEmployee);
         return employeeRepository.save(existingEmployee);
     }
 

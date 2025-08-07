@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class DepartmentServiceImpl implements DepartmentService {
@@ -32,11 +33,18 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .orElseThrow(() -> new ResourceNotFoundException("Department not found with id : " + id));
     }
 
+    @Transactional
     public Department saveDepartment(Department department) {
-        if (departmentRepository.existsByName(department.getName())) {
+        String trimmedName = department.getName().trim();
+        if (departmentRepository.existsByName(trimmedName)) {
             throw new BusinessLogicException("A department with the name '" + department.getName() + "' already exists.");
         }
-        return departmentRepository.save(department);
+        department.setName(trimmedName);
+        Department savedDepartment = departmentRepository.save(department);
+        if (savedDepartment.isMandatory()){
+            addDepartmentToEmployees(savedDepartment);
+        }
+        return savedDepartment;
     }
 
     @Transactional
@@ -46,20 +54,27 @@ public class DepartmentServiceImpl implements DepartmentService {
         if (existingDepartment.isReadonly()) {
             throw new BusinessLogicException("Cannot update readonly department");
         }
+        String trimmedName = department.getName().trim();
+        Optional<Department> optionalDepartment = departmentRepository.findByName(trimmedName);
+        if (optionalDepartment.isPresent() && !optionalDepartment.get().getId().equals(id)) {
+            throw new BusinessLogicException("A department with the name '" + department.getName() + "' already exists.");
+        }
 
-        boolean isMandatoryChanging = existingDepartment.isMandatory() && (!department.isMandatory());
+        boolean isBecomingMandatory = !existingDepartment.isMandatory() && department.isMandatory();
+        boolean isLosingMandatory = existingDepartment.isMandatory() && (!department.isMandatory());
 
         existingDepartment.setName(department.getName());
         existingDepartment.setReadonly(department.isReadonly());
         existingDepartment.setMandatory(department.isMandatory());
 
-        Department updatedDepartment = departmentRepository.save(existingDepartment);
-
-        if(isMandatoryChanging){
-            removeDepartment(updatedDepartment);
+        if (isBecomingMandatory){
+            addDepartmentToEmployees(existingDepartment);
+        }
+        if(isLosingMandatory){
+            removeDepartment(existingDepartment);
         }
 
-        return updatedDepartment;
+        return existingDepartment;
     }
 
     public void deleteDepartment(Integer id) {
@@ -75,7 +90,15 @@ public class DepartmentServiceImpl implements DepartmentService {
 
         for (Employee employee : employeeInDepartment) {
             employee.getDepartments().removeIf(d -> d.getId().equals(department.getId()));
-            employeeRepository.save(employee);
+        }
+    }
+
+    private void addDepartmentToEmployees(Department department) {
+        List<Employee> allEmployees = employeeRepository.findAll();
+        for (Employee employee : allEmployees) {
+            if (employee.getDepartments().stream().noneMatch(d -> d.getId().equals(department.getId()))) {
+                employee.getDepartments().add(department);
+            }
         }
     }
 }

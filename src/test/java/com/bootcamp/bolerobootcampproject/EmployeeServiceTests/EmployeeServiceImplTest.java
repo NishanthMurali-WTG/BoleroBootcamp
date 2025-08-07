@@ -14,10 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EmployeeServiceImplTest{
@@ -30,6 +27,29 @@ public class EmployeeServiceImplTest{
     @InjectMocks
     private EmployeeServiceImpl employeeService;
 
+    @Test
+    void getAllEmployees_shouldReturnAllEmployees() {
+        Employee employee1 = new Employee();
+        employee1.setId(1);
+        employee1.setNameFirst("Nishanth");
+        employee1.setNameLast("Murali");
+        employee1.setDepartments(new HashSet<>());
+
+        Employee employee2 = new Employee();
+        employee2.setId(2);
+        employee2.setNameFirst("Arun");
+        employee2.setNameLast("P R");
+        employee2.setDepartments(new HashSet<>());
+
+        when(employeeRepository.findAll()).thenReturn(Arrays.asList(employee1, employee2));
+        List<Employee> employees = employeeService.getAllEmployees();
+
+        assertNotNull(employees);
+        assertEquals(2, employees.size());
+        assertEquals("Arun", employees.get(1).getNameFirst());
+        verify(employeeRepository, times(1)).findAll();
+
+    }
     @Test
     void saveEmployee_AddsMandatoryDepartmentAndSaveEmployeeSuccessfully(){
         Employee employee = new Employee();
